@@ -6,7 +6,7 @@ var log = require('./utils/log.js');
 
 var autoAppKernel = function() {
     log('Getting all the dependencies required...');
-    var requirements = getRequirements([]);
+    var requirements = getRequirements();
     var bundlesInjections = formatInjections(requirements);
     var injection = injector(bundlesInjections);
 

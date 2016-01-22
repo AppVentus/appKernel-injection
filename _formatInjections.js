@@ -16,15 +16,20 @@ var devExceptions = require('./exceptions/dev.js');
  * dependencies
  */
 var bundlesFilter = function(dependencies) {
-    var bundles = [];
+    var bundles = {
+        prod: [],
+        dev: [],
+    };
 
-    for (var key in dependencies) {
-        var dependency = dependencies[key];
-        var dependencyPath = './vendor/' + dependency;
+    for (var type in dependencies) {
+        for (var key in dependencies[type]) {
+            var dependency = dependencies[type][key];
+            var dependencyPath = './vendor/' + dependency;
 
-        if (doFileExists(dependencyPath)) {
-            var dependencyBundles = finder.from(dependencyPath).findFiles('*Bundle.php');
-            bundles = bundles.concat(dependencyBundles);
+            if (doFileExists(dependencyPath)) {
+                var dependencyBundles = finder.from(dependencyPath).findFiles('*Bundle.php');
+                bundles[type] = bundles[type].concat(dependencyBundles);
+            }
         }
     }
 
@@ -45,18 +50,20 @@ var appKernelInjections = function(bundles) {
         dev: [],
     };
 
-    for (var key in bundles) {
-        var bundle = bundles[key];
-        var file = fs.readFileSync(bundle, 'utf8');
+    for (var type in bundles) {
+        for (var key in bundles[type]) {
+            var bundle = bundles[type][key];
+            var file = fs.readFileSync(bundle, 'utf8');
 
-        if (isBundle(file)) {
-            var injection = getClassInjection(file);
+            if (isBundle(file)) {
+                var injection = getClassInjection(file, type);
 
-            if (isBundleDevException(injection)) {
-                injections.dev = injections.dev.concat(injection);
+                if (isBundleDevException(injection.prod)) {
+                    injections.dev = injections.dev.concat(injection.dev);
+                } else {
+                    injections[type] = injections[type].concat(injection[type]);
+                }
             }
-
-            injections.prod = injections.prod.concat(injection);
         }
     }
 
@@ -69,16 +76,20 @@ var appKernelInjections = function(bundles) {
 /**
  * Format the injection
  */
-var getClassInjection = function(file) {
+var getClassInjection = function(file, type) {
     var namespace = file.match(/namespace\s(.*)\;/)[1];
     var bundleClass = file.match(/class\s(.*)\sextends/)[1];
+    console.log(namespace, bundleClass);
 
-    var parenthesis = '(),';
+    var parenthesis = '()';
     if (namespace === 'JMS\\DiExtraBundle' && bundleClass === 'JMSDiExtraBundle') {
-        parenthesis = '($this),';
+        parenthesis = '($this)';
     }
 
-    return 'new ' + namespace + '\\' + bundleClass + parenthesis;
+    return {
+        prod: 'new ' + namespace + '\\' + bundleClass + parenthesis + ',',
+        dev: '$bundles[] = new ' + namespace + '\\' + bundleClass + parenthesis + ';'
+    };
 };
 
 
@@ -90,7 +101,6 @@ var isBundleDevException = function(injection) {
     if (devExceptions.indexOf(injection) >= 0) {
         return true;
     }
-
     return false;
 };
 

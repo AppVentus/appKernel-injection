@@ -21,13 +21,30 @@ var dependencyAlreadyHandled = function(require, dependency) {
     return false;
 };
 
+var addInRequirements = function(require, type, dependency) {
+    if (!dependencyAlreadyHandled(require[type], dependency)) {
+        require[type] = rmDuplicated(require[type].concat(dependency));
+
+        var dependencyPath = './vendor/' + dependency;
+        if (doFileExists(dependencyPath)) {
+            var dependencyComposerPath = getClosestComposer(dependencyPath);
+            return getRequirements(require, dependencyComposerPath);
+        }
+    }
+
+    return require;
+};
+
 /**
  * Recursive method to read a composer.json and extract the required
  * dependencies
  */
-var getRequirements = function(require, composerPath, deepness) {
-    if (typeof(deepness) === 'undefined') {
-        deepness = 0;
+var getRequirements = function(require, composerPath) {
+    if (typeof(require) === 'undefined') {
+        require = {
+            prod: [],
+            dev: []
+        };
     }
 
     // Search into the project composer.json by default
@@ -38,16 +55,14 @@ var getRequirements = function(require, composerPath, deepness) {
     var composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
 
     if (composer.require) {
-        for (var dependency in composer.require) {
-            if (!dependencyAlreadyHandled(require, dependency)) {
-                require = rmDuplicated(require.concat(dependency));
+        for (var prod_dependency in composer.require) {
+            require = addInRequirements(require, 'prod', prod_dependency);
+        }
+    }
 
-                var dependencyPath = './vendor/' + dependency;
-                if (doFileExists(dependencyPath)) {
-                    var dependencyComposerPath = getClosestComposer(dependencyPath);
-                    require = getRequirements(require, dependencyComposerPath, deepness++);
-                }
-            }
+    if (composer['require-dev']) {
+        for (var dev_dependency in composer['require-dev']) {
+            require = addInRequirements(require, 'dev', dev_dependency);
         }
     }
 
