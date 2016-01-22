@@ -60,8 +60,8 @@ var appKernelInjections = function(bundles) {
         }
     }
 
-    injections.prod = rmDuplicated(injections.prod).filter(appKernelFilter);
-    injections.dev = rmDuplicated(injections.dev).filter(appKernelFilter);
+    injections.prod = rmDuplicated(injections.prod).filter(appKernelFilter).sort();
+    injections.dev = rmDuplicated(injections.dev).filter(appKernelFilter).sort();
 
     return injections;
 };
