@@ -1,0 +1,30 @@
+{
+  "name": "appkernel-injection",
+  "version": "1.0.0",
+  "description": "Node.js module to inject Symfony 2 bundles into appKernel from composer.json file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AppVentus/appKernel-injection.git"
+  },
+  "keywords": [
+    "symfony",
+    "nodejs"
+  ],
+  "author": "Loïc Goyet",
+  "contributors": [
+    {
+      "name": "Loïc Goyet",
+      "email": "loic@appventus.com",
+      "url": "https://appventus.com/"
+    }
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AppVentus/appKernel-injection/issues"
+  },
+  "homepage": "https://github.com/AppVentus/appKernel-injection#readme"
+}
