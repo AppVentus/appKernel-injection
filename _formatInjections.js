@@ -55,9 +55,9 @@ var appKernelInjections = function(bundles) {
 
             if (isDev) {
                 injections.dev = injections.dev.concat(injection);
+            } else {
+                injections.prod = injections.prod.concat(injection);
             }
-
-            injections.prod = injections.prod.concat(injection);
         }
     }
 
