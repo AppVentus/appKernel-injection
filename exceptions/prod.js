@@ -9,6 +9,7 @@ var prodExceptions = [
     'new Doctrine\\Bundle\\DoctrineCacheBundle\\DoctrineCacheBundle(),',
     'new Fixtures\\Bundles\\YamlBundle\\XmlBundle(),',
     'new Sensio\\Bundle\\FrameworkExtraBundle\\SensioFrameworkExtraBundle(),',
+    'new Sensio\\Bundle\\DistributionBundle\\SensioDistributionBundle(),',
 ];
 
 module.exports = prodExceptions;

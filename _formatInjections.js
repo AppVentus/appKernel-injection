@@ -50,10 +50,11 @@ var appKernelInjections = function(bundles) {
         var file = fs.readFileSync(bundle, 'utf8');
 
         if (isBundle(file)) {
+            var injection = getClassInjection(file);
             var isDev = isBundleDevException(injection);
-            var injection = getClassInjection(file, isDev);
 
             if (isDev) {
+                injection = getClassInjection(file, isDev);
                 injections.dev = injections.dev.concat(injection);
             } else {
                 injections.prod = injections.prod.concat(injection);
@@ -71,6 +72,10 @@ var appKernelInjections = function(bundles) {
  * Format the injection
  */
 var getClassInjection = function(file, dev) {
+    if (typeof(dev) === 'undefined') {
+        dev = false;
+    }
+
     var namespace = file.match(/namespace\s(.*)\;/)[1];
     var bundleClass = file.match(/class\s(.*)\sextends/)[1];
 
