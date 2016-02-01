@@ -50,9 +50,10 @@ var appKernelInjections = function(bundles) {
         var file = fs.readFileSync(bundle, 'utf8');
 
         if (isBundle(file)) {
-            var injection = getClassInjection(file);
+            var isDev = isBundleDevException(injection);
+            var injection = getClassInjection(file, isDev);
 
-            if (isBundleDevException(injection)) {
+            if (isDev) {
                 injections.dev = injections.dev.concat(injection);
             }
 
@@ -69,16 +70,31 @@ var appKernelInjections = function(bundles) {
 /**
  * Format the injection
  */
-var getClassInjection = function(file) {
+var getClassInjection = function(file, dev) {
     var namespace = file.match(/namespace\s(.*)\;/)[1];
     var bundleClass = file.match(/class\s(.*)\sextends/)[1];
 
-    var parenthesis = '(),';
-    if (namespace === 'JMS\\DiExtraBundle' && bundleClass === 'JMSDiExtraBundle') {
-        parenthesis = '($this),';
+    var prefix = 'new ';
+    if (dev) {
+        prefix = '$bundles[] = new ';
     }
 
-    return 'new ' + namespace + '\\' + bundleClass + parenthesis;
+    var suffix = '(),';
+    if (dev) {
+        suffix = '();';
+    }
+
+    if (namespace === 'JMS\\DiExtraBundle' && bundleClass === 'JMSDiExtraBundle') {
+        suffix = '($this)';
+
+        if (dev) {
+            suffix = suffix + ';';
+        } else {
+            suffix = suffix + ',';
+        }
+    }
+
+    return prefix + namespace + '\\' + bundleClass + suffix;
 };
 
 
